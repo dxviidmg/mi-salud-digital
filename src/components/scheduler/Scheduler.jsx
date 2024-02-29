@@ -13,9 +13,9 @@ import {
 
 export const getAppointmentsData = () => {
     return [
-      { id: 1, startDate: '2018-06-25T09:00', endDate: '2018-06-25T10:00', title: 'Meeting' },
-      { id: 2, startDate: '2018-06-26T11:00', endDate: '2018-06-26T12:00', title: 'Lunch' },
-      { id: 3, startDate: '2018-06-27T13:00', endDate: '2018-06-27T14:00', title: 'Presentation' },
+      { id: 1, startDate: '2024-02-25T09:00', endDate: '2024-02-25T10:00', title: 'Meeting' },
+      { id: 2, startDate: '2024-02-26T11:00', endDate: '2024-02-26T12:00', title: 'Lunch' },
+      { id: 3, startDate: '2024-02-27T13:00', endDate: '2024-02-27T14:00', title: 'Presentation' },
       // Add more hardcoded appointments as needed
     ];
   };
@@ -23,9 +23,10 @@ export const getAppointmentsData = () => {
 
 const Demo = () => {
   const [data, setData] = useState(getAppointmentsData());
-  const [currentDate, setCurrentDate] = useState('2024-02-28');
+  const [currentDate, setCurrentDate] = useState(Date());
 
   const currentDateChange = (newCurrentDate) => {
+    console.log(newCurrentDate)
     setCurrentDate(newCurrentDate);
   };
 
