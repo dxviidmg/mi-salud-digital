@@ -4,6 +4,9 @@ import { ViewState } from '@devexpress/dx-react-scheduler';
 import {
   Scheduler,
   WeekView,
+  DayView,
+  MonthView,
+  ViewSwitcher,
   Toolbar,
   DateNavigator,
   Appointments,
@@ -50,7 +53,7 @@ const Demo = () => {
         const data = await getConsultationList();
         console.log('data', data)
         
-        const map1 = data.map((x) => ({startDate: x.date_time, endDate: x.date_time_end, title: 'consulta', color: 'green'}));
+        const map1 = data.map((x) => ({startDate: x.date_time, endDate: x.date_time_end, title: x.patient.full_name, color: 'green'}));
         console.log('map', map1)
         setData(map1);
       } catch (error) {
@@ -64,6 +67,9 @@ const Demo = () => {
 
   }, []);
 
+
+
+  
   return (
     <Paper>
       <Scheduler
@@ -72,12 +78,22 @@ const Demo = () => {
         <ViewState
           currentDate={currentDate}
           onCurrentDateChange={currentDateChange}
+          defaultCurrentViewName="Week"
+        />
+        <DayView
+          startDayHour={startTime}
+          endDayHour={endTime}
         />
         <WeekView
           startDayHour={startTime}
           endDayHour={endTime}
         />
+        <MonthView
+          startDayHour={startTime}
+          endDayHour={endTime}
+        />
         <Toolbar />
+        <ViewSwitcher />
         <DateNavigator />
         <TodayButton />
         <Appointments />
