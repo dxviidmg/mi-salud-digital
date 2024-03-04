@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
-import { ViewState } from '@devexpress/dx-react-scheduler';
+import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
 import {
   Scheduler,
   WeekView,
@@ -11,27 +11,22 @@ import {
   DateNavigator,
   Appointments,
   TodayButton,
-  AppointmentTooltip
+  AppointmentTooltip,
+  AppointmentForm,
+  ConfirmationDialog
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { getConsultationList } from '../apis/consultations';
 
 
-export const getAppointmentsData = () => {
-    return [
-      { id: 1, startDate: '2024-02-25T09:30', endDate: '2024-02-25T10:00', title: 'Meeting'},
-      { id: 2, startDate: '2024-02-26T11:00', endDate: '2024-02-26T12:00', title: 'Lunch' },
-      { id: 3, startDate: '2024-02-27T13:00', endDate: '2024-02-27T14:00', title: 'Presentation' },
-      // Add more hardcoded appointments as needed
-    ];
-  };
-
 
 const Demo = () => {
-  const [data, setData] = useState(getAppointmentsData());
+  const [data, setData] = useState([]);
 
   const [currentDate, setCurrentDate] = useState(Date());
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
+
+
 
   const currentDateChange = (newCurrentDate) => {
     console.log(newCurrentDate)
@@ -69,6 +64,39 @@ const Demo = () => {
 
 
 
+
+
+
+  const commitChanges = ({ added, changed, deleted }) => {
+    console.log(added, changed, deleted)
+    setData(prevData => {
+      let newData = [...prevData];
+      if (added) {
+        const startingAddedId = newData.length > 0 ? newData[newData.length - 1].id + 1 : 0;
+        newData = [...newData, { id: startingAddedId, ...added }];
+      }
+      if (changed) {
+        newData = newData.map(appointment => (
+          changed[appointment.id] ? { ...appointment, ...changed[appointment.id] } : appointment
+        ));
+      }
+      if (deleted !== undefined) {
+        newData = newData.filter(appointment => appointment.id !== deleted);
+      }
+      return newData;
+    });
+  };
+
+
+
+
+
+
+
+
+
+
+  
   
   return (
     <Paper>
@@ -80,6 +108,11 @@ const Demo = () => {
           onCurrentDateChange={currentDateChange}
           defaultCurrentViewName="Week"
         />
+
+          <EditingState
+            onCommitChanges={commitChanges}
+          />
+        <IntegratedEditing />
         <DayView
           startDayHour={startTime}
           endDayHour={endTime}
@@ -96,10 +129,13 @@ const Demo = () => {
         <ViewSwitcher />
         <DateNavigator />
         <TodayButton />
+        <ConfirmationDialog />
         <Appointments />
         <AppointmentTooltip
             showDeleteButton
+            showOpenButton
           />
+          <AppointmentForm />
       </Scheduler>
     </Paper>
   );
