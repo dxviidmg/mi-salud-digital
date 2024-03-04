@@ -19,10 +19,10 @@ import { getConsultationList } from '../apis/consultations';
 
 
 
-const Demo = () => {
+const MyScheduler = () => {
   const [data, setData] = useState([]);
 
-  const [currentDate, setCurrentDate] = useState(Date());
+  const [currentDate, setCurrentDate] = useState(new Date().toISOString());
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
 
@@ -141,4 +141,4 @@ const Demo = () => {
   );
 };
 
-export default Demo;
+export default MyScheduler;

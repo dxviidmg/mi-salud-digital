@@ -8,6 +8,7 @@ import {
   Routes,
 } from "react-router-dom";
 import Login from './components/login/Login';
+import Demo2 from './components/scheduler/Scheduler2';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -34,6 +35,7 @@ function App() {
       {isLoggedIn ? (
         <>
           <Route path="/scheduler/" element={<MyScheduler />} />
+          <Route path="/scheduler2/" element={<Demo2 />} />
         </>
       ) : (
         <Route path="/" element={<Login onLogin={handleLogin} />} />
