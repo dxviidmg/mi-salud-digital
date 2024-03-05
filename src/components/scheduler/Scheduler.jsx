@@ -48,7 +48,7 @@ const MyScheduler = () => {
         const data = await getConsultationList();
         console.log('data', data)
         
-        const map1 = data.map((x) => ({startDate: x.date_time, endDate: x.date_time_end, title: x.patient.full_name, color: 'green'}));
+        const map1 = data.map((x) => ({id: x.id, startDate: x.date_time, endDate: x.date_time_end, title: x.patient.full_name, color: 'green'}));
         console.log('map', map1)
         setData(map1);
       } catch (error) {
