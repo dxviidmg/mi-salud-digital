@@ -3,6 +3,8 @@ import Paper from '@mui/material/Paper';
 import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
 import {
   Scheduler,
+  Resources,
+
   WeekView,
   DayView,
   MonthView,
@@ -17,15 +19,49 @@ import {
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { getConsultationList } from '../apis/consultations';
 
+import { styled } from '@mui/material/styles';
+
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
+const PREFIX = 'Demo';
+
+const classes = {
+  container: `${PREFIX}-container`,
+  text: `${PREFIX}-text`,
+};
 
 
 const MyScheduler = () => {
   const [data, setData] = useState([]);
-
   const [currentDate, setCurrentDate] = useState(new Date().toISOString());
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
+  const [mainResourceName, setState] = useState("location");
+/*  const resources = [
+    {
+      fieldName: 'location',
+      title: 'Location',
+      instances: locations,
+    },
+    {
+      fieldName: 'patients',
+      title: 'Patient',
+      allowMultiple: true,
+      instances: [
+        { id: 1, text: 'Andrew Glover' },
+        { id: 2, text: 'Arnie Schwartz' },
+        { id: 3, text: 'John Heart' },
+        { id: 4, text: 'Taylor Riley' },
+        { id: 5, text: 'Brad Farkus' },
+      ],
+    },
+  ]
+*/
 
+  const [resources, setResources] = useState([])
+
+//  const mainResourceName = 'patients'
 
 
   const currentDateChange = (newCurrentDate) => {
@@ -35,11 +71,67 @@ const MyScheduler = () => {
 
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"))
-    console.log('user', user.availability_time_range)
-    setStartTime(user.availability_time_range.start_time)
-    setEndTime(user.availability_time_range.end_time)
+    const cargarRecursosDesdeLocalStorage = async () => {
+      try {
 
+        const rb = [{
+          fieldName: 'location',
+          title: 'Location',
+          instances: [],
+        },
+        {
+          fieldName: 'patient',
+          title: 'Patient',
+          allowMultiple: true,
+          instances: [
+            { id: 1, text: 'Andrew Glover' },
+            { id: 2, text: 'Arnie Schwartz' },
+            { id: 3, text: 'John Heart' },
+            { id: 4, text: 'Taylor Riley' },
+            { id: 5, text: 'Brad Farkus' },
+          ],
+
+
+        },
+      
+
+
+        {
+          fieldName: 'status',
+          title: 'Status',
+          instances: [
+            { id: 0, text: 'Sin confirmar' },
+            { id: 1, text: 'Confirmado' },
+            { id: 2, text: 'Cancelado' },
+          ],
+
+
+        }
+
+      
+      ]
+
+
+        const user = JSON.parse(localStorage.getItem("user"));
+        console.log('user', user.availability_time_range);
+        setStartTime(user.availability_time_range.start_time);
+        setEndTime(user.availability_time_range.end_time);
+        console.log(user.consulting_rooms);
+        
+        const mapped_consulting_rooms = user.consulting_rooms.map((e) => ({ id: e.full_address, text: e.full_address }));
+        
+        const nuevosRecursos = [...rb];
+        nuevosRecursos[0].instances = mapped_consulting_rooms;
+        console.log('nuevosRecursos', nuevosRecursos);
+        
+        setResources(nuevosRecursos);
+      } catch (error) {
+        console.error('Error al cargar recursos desde el almacenamiento local:', error);
+      }
+    };
+    
+    // Llamar a la función para cargar recursos desde el almacenamiento local
+    cargarRecursosDesdeLocalStorage();
     
 
 
@@ -48,15 +140,16 @@ const MyScheduler = () => {
         const data = await getConsultationList();
         console.log('data', data)
         
-        const map1 = data.map((x) => ({id: x.id, startDate: x.date_time, endDate: x.date_time_end, title: x.patient.full_name, color: 'green'}));
-        console.log('map', map1)
-        setData(map1);
+        const mapped_data = data.map((e) => ({id: e.id, startDate: e.date_time, endDate: e.date_time_end, title: e.patient.full_name, location: e.consulting_room.full_address}));
+        console.log('mapped_data', mapped_data)
+        setData(mapped_data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
+    cargarRecursosDesdeLocalStorage();
 
 
 
@@ -89,16 +182,63 @@ const MyScheduler = () => {
 
 
 
+  const StyledDiv = styled('div')(({ theme }) => ({
+    [`&.${classes.container}`]: {
+      display: 'flex',
+      marginBottom: theme.spacing(2),
+      justifyContent: 'flex-end',
+    },
+    [`& .${classes.text}`]: {
+      ...theme.typography.h6,
+      marginRight: theme.spacing(2),
+    },
+  }));
 
 
 
 
+  const ResourceSwitcher = (
+    ({
+      mainResourceName, onChange, resources,
+    }) => (
+      <StyledDiv className={classes.container}>
+        <div className={classes.text}>
+          Main resource name:
+        </div>
+        <Select
+          variant="standard"
+          value={mainResourceName}
+          onChange={e => onChange(e.target.value)}
+        >
+          {resources.map(resource => (
+            <MenuItem key={resource.fieldName} value={resource.fieldName}>
+              {resource.title}
+            </MenuItem>
+          ))}
+        </Select>
+      </StyledDiv>
+    )
+  );
 
+  function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+
+  function changeMainResource(mainResourceName) {
+    setState(mainResourceName)
+  }
 
 
   
   
   return (
+    <>
+    <ResourceSwitcher
+    resources={resources}
+    mainResourceName={mainResourceName}
+    onChange={changeMainResource}
+  />
     <Paper>
       <Scheduler
         data={data}
@@ -135,9 +275,17 @@ const MyScheduler = () => {
             showDeleteButton
             showOpenButton
           />
-          <AppointmentForm />
+
+
+        <Resources
+              data={resources}
+              mainResourceName={mainResourceName}
+        />
+
+        <AppointmentForm />
       </Scheduler>
     </Paper>
+    </>
   );
 };
 
