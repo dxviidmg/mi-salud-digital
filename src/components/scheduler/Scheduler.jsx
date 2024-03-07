@@ -28,7 +28,7 @@ import { styled } from "@mui/material/styles";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
-import './scheduler.css'
+import "./scheduler.css";
 
 const PREFIX = "Demo";
 
@@ -43,140 +43,82 @@ const MyScheduler = () => {
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
   const [mainResourceName, setState] = useState("location");
-  /*  const resources = [
-    {
-      fieldName: 'location',
-      title: 'Location',
-      instances: locations,
-    },
-    {
-      fieldName: 'patients',
-      title: 'Patient',
-      allowMultiple: true,
-      instances: [
-        { id: 1, text: 'Andrew Glover' },
-        { id: 2, text: 'Arnie Schwartz' },
-        { id: 3, text: 'John Heart' },
-        { id: 4, text: 'Taylor Riley' },
-        { id: 5, text: 'Brad Farkus' },
-      ],
-    },
-  ]
-*/
-
-  const [resources, setResources] = useState([]);
-
-  //  const mainResourceName = 'patients'
 
   const currentDateChange = (newCurrentDate) => {
     console.log(newCurrentDate);
     setCurrentDate(newCurrentDate);
   };
 
+  const [resources, setResources] = useState([]);
+  const resourcesBase = [
+    {
+      fieldName: "location",
+      title: "Location",
+      instances: [],
+    },
+    {
+      fieldName: "patient",
+      title: "Patient",
+      instances: [],
+    },
+    {
+      fieldName: "status",
+      title: "Status",
+      instances: [
+        { id: 0, text: "Sin confirmar" },
+        { id: 1, text: "Confirmado" },
+        { id: 2, text: "Cancelado" },
+      ],
+    },
+  ];
+
   useEffect(() => {
-
-
-    const rb = [
-      {
-        fieldName: "location",
-        title: "Location",
-        instances: [],
-      },
-      {
-        fieldName: "patient",
-        title: "Patient",
-        instances: [
-        ],
-      },
-
-      {
-        fieldName: "status",
-        title: "Status",
-        instances: [
-          { id: 0, text: "Sin confirmar" },
-          { id: 1, text: "Confirmado" },
-          { id: 2, text: "Cancelado" },
-        ],
-      },
-    ];
-
-
-    const cargarRecursosDesdeLocalStorage = async () => {
+    const fetchData = async () => {
       try {
-
+        const [consultationData, patientData] = await Promise.all([
+          getConsultationList(),
+          getPatientList(),
+        ]);
 
         const user = JSON.parse(localStorage.getItem("user"));
         console.log("user", user.availability_time_range);
-        setStartTime(user.availability_time_range.start_time);
-        setEndTime(user.availability_time_range.end_time);
-        console.log(user.consulting_rooms);
+        const { start_time: startTime, end_time: endTime } =
+          user.availability_time_range;
 
-        const mapped_consulting_rooms = user.consulting_rooms.map((e) => ({
-          id: e.full_address,
-          text: e.full_address,
+        const mappedConsultingRooms = user.consulting_rooms.map((room) => ({
+          id: room.full_address,
+          text: room.full_address,
         }));
 
-        const nuevosRecursos = [...rb];
-        nuevosRecursos[0].instances = mapped_consulting_rooms;
-        console.log("nuevosRecursos", nuevosRecursos);
+        const mappedPatients = patientData.map((patient) => ({
+          id: patient.id,
+          text: patient.full_name,
+        }));
 
-        setResources(nuevosRecursos);
-      } catch (error) {
-        console.error(
-          "Error al cargar recursos desde el almacenamiento local:",
-          error
+        const updatedResources = [...resourcesBase];
+        updatedResources[0].instances = mappedConsultingRooms;
+        updatedResources[1].instances = mappedPatients;
+
+        setStartTime(startTime);
+        setEndTime(endTime);
+        setData(
+          consultationData.map((consultation) => ({
+            id: consultation.id,
+            startDate: consultation.date_time,
+            endDate: consultation.date_time_end,
+            title: consultation.patient.full_name,
+            location: consultation.consulting_room.full_address,
+            status: consultation.status,
+            patient: consultation.patient.id,
+          }))
         );
-      }
-    };
-
-    // Llamar a la función para cargar recursos desde el almacenamiento local
-    cargarRecursosDesdeLocalStorage();
-
-    const fetchData = async () => {
-      try {
-        const data = await getConsultationList();
-
-        const mapped_data = data.map((e) => ({
-          id: e.id,
-          startDate: e.date_time,
-          endDate: e.date_time_end,
-          title: e.patient.full_name,
-          location: e.consulting_room.full_address,
-          status: e.status,
-          patient: e.patient.id
-        }));
-        console.log("mapped_data", mapped_data);
-        setData(mapped_data);
+        setResources(updatedResources);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
-
-    const fetchData2 = async () => {
-      try {
-        const data2 = await getPatientList();
-
-        const mapped_patients = data2.map((e) => ({
-          id: e.id,
-          text: e.full_name,
-        }));
-        console.log("mapped_patients", mapped_patients);
-        const nuevosRecursos = [...rb];
-        nuevosRecursos[1].instances = mapped_patients;
-        setResources(nuevosRecursos);
-        console.log("nuevosRecursos", nuevosRecursos);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
 
     fetchData();
-    fetchData2()
-    cargarRecursosDesdeLocalStorage();
-
-    
   }, []);
 
   const commitChanges = ({ added, changed, deleted }) => {
@@ -231,7 +173,6 @@ const MyScheduler = () => {
     </StyledDiv>
   );
 
-
   function changeMainResource(mainResourceName) {
     setState(mainResourceName);
   }
@@ -266,7 +207,7 @@ const MyScheduler = () => {
 
           <Resources data={resources} mainResourceName={mainResourceName} />
 
-          <AppointmentForm/>
+          <AppointmentForm />
         </Scheduler>
       </Paper>
     </>
