@@ -21,11 +21,14 @@ import {
   ConfirmationDialog,
 } from "@devexpress/dx-react-scheduler-material-ui";
 import { getConsultationList } from "../apis/consultations";
+import { getPatientList } from "../apis/patients";
 
 import { styled } from "@mui/material/styles";
 
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+
+import './scheduler.css'
 
 const PREFIX = "Demo";
 
@@ -71,37 +74,36 @@ const MyScheduler = () => {
   };
 
   useEffect(() => {
+
+
+    const rb = [
+      {
+        fieldName: "location",
+        title: "Location",
+        instances: [],
+      },
+      {
+        fieldName: "patient",
+        title: "Patient",
+        instances: [
+        ],
+      },
+
+      {
+        fieldName: "status",
+        title: "Status",
+        instances: [
+          { id: 0, text: "Sin confirmar" },
+          { id: 1, text: "Confirmado" },
+          { id: 2, text: "Cancelado" },
+        ],
+      },
+    ];
+
+
     const cargarRecursosDesdeLocalStorage = async () => {
       try {
-        const rb = [
-          {
-            fieldName: "location",
-            title: "Location",
-            instances: [],
-          },
-          {
-            fieldName: "patient",
-            title: "Patient",
-            allowMultiple: true,
-            instances: [
-              { id: 1, text: "Andrew Glover" },
-              { id: 2, text: "Arnie Schwartz" },
-              { id: 3, text: "John Heart" },
-              { id: 4, text: "Taylor Riley" },
-              { id: 5, text: "Brad Farkus" },
-            ],
-          },
 
-          {
-            fieldName: "status",
-            title: "Status",
-            instances: [
-              { id: 0, text: "Sin confirmar" },
-              { id: 1, text: "Confirmado" },
-              { id: 2, text: "Cancelado" },
-            ],
-          },
-        ];
 
         const user = JSON.parse(localStorage.getItem("user"));
         console.log("user", user.availability_time_range);
@@ -133,7 +135,6 @@ const MyScheduler = () => {
     const fetchData = async () => {
       try {
         const data = await getConsultationList();
-        console.log("data", data);
 
         const mapped_data = data.map((e) => ({
           id: e.id,
@@ -141,6 +142,8 @@ const MyScheduler = () => {
           endDate: e.date_time_end,
           title: e.patient.full_name,
           location: e.consulting_room.full_address,
+          status: e.status,
+          patient: e.patient.id
         }));
         console.log("mapped_data", mapped_data);
         setData(mapped_data);
@@ -149,8 +152,31 @@ const MyScheduler = () => {
       }
     };
 
+
+    const fetchData2 = async () => {
+      try {
+        const data2 = await getPatientList();
+
+        const mapped_patients = data2.map((e) => ({
+          id: e.id,
+          text: e.full_name,
+        }));
+        console.log("mapped_patients", mapped_patients);
+        const nuevosRecursos = [...rb];
+        nuevosRecursos[1].instances = mapped_patients;
+        setResources(nuevosRecursos);
+        console.log("nuevosRecursos", nuevosRecursos);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+
     fetchData();
+    fetchData2()
     cargarRecursosDesdeLocalStorage();
+
+    
   }, []);
 
   const commitChanges = ({ added, changed, deleted }) => {
@@ -205,9 +231,6 @@ const MyScheduler = () => {
     </StyledDiv>
   );
 
-  function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
 
   function changeMainResource(mainResourceName) {
     setState(mainResourceName);
@@ -243,7 +266,7 @@ const MyScheduler = () => {
 
           <Resources data={resources} mainResourceName={mainResourceName} />
 
-          <AppointmentForm />
+          <AppointmentForm/>
         </Scheduler>
       </Paper>
     </>
