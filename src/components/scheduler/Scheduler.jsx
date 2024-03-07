@@ -42,7 +42,7 @@ const MyScheduler = () => {
   const [currentDate, setCurrentDate] = useState(new Date().toISOString());
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
-  const [mainResourceName, setState] = useState("location");
+  const [mainResourceName, setState] = useState("status");
 
   const currentDateChange = (newCurrentDate) => {
     console.log(newCurrentDate);
@@ -52,6 +52,15 @@ const MyScheduler = () => {
   const [resources, setResources] = useState([]);
   const resourcesBase = [
     {
+      fieldName: "status",
+      title: "Status",
+      instances: [
+        { id: 0, text: "Sin confirmar", color: "#e5ac00" },
+        { id: 1, text: "Confirmado", color: "green" },
+        { id: 2, text: "Cancelado", color: "red" },
+      ],
+    },
+    {
       fieldName: "location",
       title: "Location",
       instances: [],
@@ -60,15 +69,6 @@ const MyScheduler = () => {
       fieldName: "patient",
       title: "Patient",
       instances: [],
-    },
-    {
-      fieldName: "status",
-      title: "Status",
-      instances: [
-        { id: 0, text: "Sin confirmar" },
-        { id: 1, text: "Confirmado" },
-        { id: 2, text: "Cancelado" },
-      ],
     },
   ];
 
@@ -96,8 +96,8 @@ const MyScheduler = () => {
         }));
 
         const updatedResources = [...resourcesBase];
-        updatedResources[0].instances = mappedConsultingRooms;
-        updatedResources[1].instances = mappedPatients;
+        updatedResources[1].instances = mappedConsultingRooms;
+        updatedResources[2].instances = mappedPatients;
 
         setStartTime(startTime);
         setEndTime(endTime);
