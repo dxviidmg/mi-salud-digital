@@ -10,6 +10,7 @@ import {
 import Login from './components/login/Login';
 import Demo2 from './components/scheduler/Scheduler2';
 import ResponsiveAppBar from './components/appbar/Appbar';
+import Patients from './components/patients/Patients';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -37,6 +38,7 @@ function App() {
         <>
           <Route path="/scheduler/" element={<MyScheduler />} />
           <Route path="/scheduler2/" element={<Demo2 />} />
+          <Route path="/patients/" element={<Patients />} />
         </>
       ) : (
         <Route path="/" element={<Login onLogin={handleLogin} />} />
