@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import Login from './components/login/Login';
 import Demo2 from './components/scheduler/Scheduler2';
+import ResponsiveAppBar from './components/appbar/Appbar';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,7 +30,7 @@ function App() {
   return (
     <Router>
 
-{/* {isLoggedIn ? <CustomNavbar /> : ""} */}    
+{isLoggedIn ? <ResponsiveAppBar /> : ""}    
 
     <Routes>
       {isLoggedIn ? (
