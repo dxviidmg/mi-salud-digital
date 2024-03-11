@@ -11,6 +11,8 @@ import Login from './components/login/Login';
 import Demo2 from './components/scheduler/Scheduler2';
 import ResponsiveAppBar from './components/appbar/Appbar';
 import Patients from './components/patients/Patients';
+import PatientPage from './components/pages/PatientPage';
+import SchedulerPage from './components/pages/SchedulerPage';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -36,9 +38,9 @@ function App() {
     <Routes>
       {isLoggedIn ? (
         <>
-          <Route path="/scheduler/" element={<MyScheduler />} />
+          <Route path="/scheduler/" element={<SchedulerPage />} />
           <Route path="/scheduler2/" element={<Demo2 />} />
-          <Route path="/patients/" element={<Patients />} />
+          <Route path="/patients/" element={<PatientPage />} />
         </>
       ) : (
         <Route path="/" element={<Login onLogin={handleLogin} />} />

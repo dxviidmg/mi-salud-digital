@@ -3,8 +3,17 @@ import Paper from "@mui/material/Paper";
 import {
   Grid,
   Table,
+  Toolbar,
+  SearchPanel,
   TableHeaderRow,
 } from "@devexpress/dx-react-grid-material-ui";
+
+import {
+  SearchState,
+  IntegratedFiltering,
+} from '@devexpress/dx-react-grid';
+
+
 import { getPatientList } from "../apis/patients";
 
 const columns = [
@@ -19,12 +28,6 @@ const Patients = () => {
     const fetchData = async () => {
       try {
         const [patientData] = await Promise.all([getPatientList()]);
-
-        const mappedPatients = patientData.map((patient) => ({
-          id: patient.id,
-          text: patient.full_name,
-        }));
-
         setData(patientData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -36,12 +39,19 @@ const Patients = () => {
 
   return (
     <div>
-      <Paper>
-        <Grid rows={data} columns={columns}>
-          <Table />
-          <TableHeaderRow />
-        </Grid>
-      </Paper>
+    <Paper>
+      <Grid
+        rows={data}
+        columns={columns}
+      >
+        <SearchState defaultValue="" />
+        <IntegratedFiltering />
+        <Table />
+        <TableHeaderRow />
+        <Toolbar />
+        <SearchPanel />
+      </Grid>
+    </Paper>
     </div>
   );
 };
