@@ -28,6 +28,7 @@ const Patients = () => {
     const fetchData = async () => {
       try {
         const [patientData] = await Promise.all([getPatientList()]);
+        console.log('patientData', patientData)
         setData(patientData);
       } catch (error) {
         console.error("Error fetching data:", error);

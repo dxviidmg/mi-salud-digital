@@ -25,7 +25,6 @@ const CustomModal = ({ open, onClose, form }) => {
         }}
       >
                 {form}
-        <Button onClick={onClose}>Cerrar</Button>
       </Box>
     </Modal>
   );

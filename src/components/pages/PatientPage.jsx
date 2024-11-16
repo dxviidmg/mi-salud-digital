@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Patients from "../patients/Patients";
 import Container from "@mui/material/Container";
-import CustomButton from "../commons/button/Custombutton";
+import CustomButton from "../commons/button/CustomButton";
 import CustomModal from "../commons/modal/CustomModal";
 import CreatePatienForm from "../forms/CreatePatientForm";
 

@@ -30,6 +30,7 @@ import MenuItem from "@mui/material/MenuItem";
 
 import "./scheduler.css";
 
+import { createConsultation } from "../apis/consultations";
 const PREFIX = "Demo";
 
 const classes = {
@@ -52,13 +53,9 @@ const MyScheduler = () => {
   const [resources, setResources] = useState([]);
   const resourcesBase = [
     {
-      fieldName: "status",
-      title: "Status",
-      instances: [
-        { id: 0, text: "Sin confirmar", color: "#e5ac00" },
-        { id: 1, text: "Confirmado", color: "green" },
-        { id: 2, text: "Cancelado", color: "red" },
-      ],
+      fieldName: "patient",
+      title: "Patient",
+      instances: [],
     },
     {
       fieldName: "location",
@@ -66,9 +63,13 @@ const MyScheduler = () => {
       instances: [],
     },
     {
-      fieldName: "patient",
-      title: "Patient",
-      instances: [],
+      fieldName: "status",
+      title: "Status",
+      instances: [
+        { id: 0, text: "Sin confirmar", color: "#e5ac00" },
+        { id: 1, text: "Confirmado", color: "green" },
+        { id: 2, text: "Cancelado", color: "red" },
+      ],
     },
   ];
 
@@ -81,7 +82,22 @@ const MyScheduler = () => {
         ]);
 
         const user = JSON.parse(localStorage.getItem("user"));
-        console.log("user", user.availability_time_range);
+        console.log("user", user);
+        const av = user.availabilities;
+
+        const av2 = av.map((consultation) => ({
+          id: consultation.id,
+          startDate: consultation.start_time,
+          endDate: consultation.end_time,
+          title: consultation.title,
+          location: consultation.consulting_room,
+          rRule: "FREQ=WEEKLY",
+        }));
+
+        setData(av2);
+
+        console.log("hoka", data);
+        console.log("av2 ======", av2);
         const { start_time: startTime, end_time: endTime } =
           user.availability_time_range;
 
@@ -90,28 +106,24 @@ const MyScheduler = () => {
           text: room.full_address,
         }));
 
+        console.log('mappedConsultingRooms', mappedConsultingRooms)
+
         const mappedPatients = patientData.map((patient) => ({
           id: patient.id,
           text: patient.full_name,
         }));
 
         const updatedResources = [...resourcesBase];
+        updatedResources[0].instances = mappedPatients;
         updatedResources[1].instances = mappedConsultingRooms;
-        updatedResources[2].instances = mappedPatients;
 
-        setStartTime(startTime);
-        setEndTime(endTime);
-        setData(
-          consultationData.map((consultation) => ({
-            id: consultation.id,
-            startDate: consultation.date_time,
-            endDate: consultation.date_time_end,
-            title: consultation.patient.full_name,
-            location: consultation.consulting_room.full_address,
-            status: consultation.status,
-            patient: consultation.patient.id,
-          }))
-        );
+        //        setStartTime(startTime);
+        //        setEndTime(endTime);
+        console.log("consultationData", consultationData);
+//                setData(consultationData);
+
+
+
         setResources(updatedResources);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -119,13 +131,68 @@ const MyScheduler = () => {
     };
 
     fetchData();
-  }, []);
+  }, [data]);
+
+  const handleCreateConsultation = async (e) => {
+    console.log("eeee", e);
+    //    e.preventDefault();
+
+    try {
+      const response = await createConsultation(e);
+      //      window.location.reload();
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    const dateObj = new Date(dateStr);
+
+    const year = dateObj.getFullYear();
+    const month = ("0" + (dateObj.getMonth() + 1)).slice(-2); // Month is zero-based, so we add 1 and pad with leading zero if needed
+    const day = ("0" + dateObj.getDate()).slice(-2);
+    const hours = ("0" + dateObj.getHours()).slice(-2);
+    const minutes = ("0" + dateObj.getMinutes()).slice(-2);
+    const seconds = ("0" + dateObj.getSeconds()).slice(-2);
+    const offset = -dateObj.getTimezoneOffset(); // Get the timezone offset in minutes and reverse it
+
+    const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${
+      offset >= 0 ? "+" : "-"
+    }${Math.abs(offset / 60)
+      .toString()
+      .padStart(2, "0")}:${(Math.abs(offset) % 60)
+      .toString()
+      .padStart(2, "0")}`;
+
+    return formattedDate;
+  };
+
+  //const dateStr = "Fri Mar 15 2024 11:30:00 GMT-0600 (Central Standard Time)";
+  //const formattedDate = formatDate(dateStr);
+  //console.log(formattedDate);
 
   const commitChanges = ({ added, changed, deleted }) => {
     console.log(added, changed, deleted);
     setData((prevData) => {
       let newData = [...prevData];
       if (added) {
+        const name_patient = resources[0].instances.filter(
+          (obj) => obj.id === added.patient
+        )[0].text;
+
+        var name_patient2 =
+          name_patient !== undefined && name_patient !== null
+            ? "La variable tiene un valor: " + name_patient
+            : "La variable no tiene un valor definido";
+        added["title"] = name_patient2;
+        console.log("added ==>", added);
+        const formattedDate = formatDate(added["startDate"]);
+        console.log(formattedDate);
+        added["date_time"] = formattedDate;
+        handleCreateConsultation(added);
+
         const startingAddedId =
           newData.length > 0 ? newData[newData.length - 1].id + 1 : 0;
         newData = [...newData, { id: startingAddedId, ...added }];

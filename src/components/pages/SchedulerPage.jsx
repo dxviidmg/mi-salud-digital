@@ -7,6 +7,7 @@ import MyScheduler from '../scheduler/Scheduler';
 const SchedulerPage = () => {
   return (
         <Container className='paddings'>
+          aqui ira el horario de atencion
         <MyScheduler/>
         </Container>
   )

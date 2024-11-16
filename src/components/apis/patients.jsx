@@ -18,3 +18,20 @@ export const getPatientList = async () => {
     return error;
   }
 };
+
+export const createPatient = async (data) => {
+  console.log(data)
+  const user = JSON.parse(localStorage.getItem("user"))
+
+  try {
+    const response = await axios.post(apiUrl, data, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${user.token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+};
